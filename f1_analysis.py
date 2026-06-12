@@ -261,6 +261,32 @@ plt.show()
 print("Speed correlation graph saved successfully!")
 
 # ==========================================
+# ANOMALY DETECTION
+# ==========================================
+
+print("\n" + "=" * 50)
+print("ANOMALY DETECTION")
+print("=" * 50)
+
+plt.figure(figsize=(10, 6))
+
+sns.boxplot(
+    x=laps["LapTime"]
+)
+
+plt.title("Anomaly Detection using Lap Time Distribution")
+
+plt.savefig(
+    "plots/anomaly_detection.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("Anomaly detection graph saved successfully!")
+
+# ==========================================
 # TASK 7 - FEATURE ENGINEERING
 # ==========================================
 
@@ -376,6 +402,36 @@ plt.savefig(
 )
 
 plt.show()
+
+# ==========================================
+# PREDICTED VS ACTUAL
+# ==========================================
+
+print("\n" + "=" * 50)
+print("PREDICTED VS ACTUAL")
+print("=" * 50)
+
+plt.figure(figsize=(8, 6))
+
+plt.scatter(
+    y_test,
+    predictions,
+    alpha=0.6
+)
+
+plt.xlabel("Actual Lap Time")
+plt.ylabel("Predicted Lap Time")
+plt.title("Actual vs Predicted Lap Times")
+
+plt.savefig(
+    "plots/predicted_vs_actual.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("Predicted vs Actual graph saved successfully!")
 
 print("Feature importance graph saved successfully!")
 
