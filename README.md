@@ -1,5 +1,7 @@
 # F1 Race Performance Analysis using Machine Learning
 
+live sever :https://nivedell09-bit.github.io/f1-race-analysis/
+
 ## Overview
 
 This project analyzes Formula 1 Bahrain Grand Prix 2024 race data using Python, data visualization techniques, and Machine Learning. The objective is to understand the factors influencing lap time performance and develop a predictive model for lap time estimation.
@@ -74,4 +76,3 @@ The analysis shows that Speed Trap Speed and Tyre Life are the most significant 
 **Nivedhitha K**
 
 GitHub: https://github.com/nivedell09-bit
-live sever :https://nivedell09-bit.github.io/f1-race-analysis/
