@@ -74,3 +74,4 @@ The analysis shows that Speed Trap Speed and Tyre Life are the most significant 
 **Nivedhitha K**
 
 GitHub: https://github.com/nivedell09-bit
+live sever :https://nivedell09-bit.github.io/f1-race-analysis/
