@@ -1,6 +1,6 @@
 # F1 Race Performance Analysis using Machine Learning
 
-live sever :https://nivedell09-bit.github.io/f1-race-analysis/
+## live sever :https://nivedell09-bit.github.io/f1-race-analysis/
 
 ## Overview
 
@@ -75,4 +75,4 @@ The analysis shows that Speed Trap Speed and Tyre Life are the most significant 
 
 **Nivedhitha K**
 
-GitHub: https://github.com/nivedell09-bit
+## GitHub: https://github.com/nivedell09-bit
