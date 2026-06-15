@@ -73,6 +73,6 @@ The analysis shows that Speed Trap Speed and Tyre Life are the most significant 
 
 ## Author
 
-**Nivedhitha K**
+## **Nivedhitha K**
 
 ## GitHub: https://github.com/nivedell09-bit
