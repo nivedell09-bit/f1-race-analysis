@@ -1,0 +1,37 @@
+{
+  "total_laps": 1101,
+  "features": 13,
+  "r2_score": 0.9834866692780591,
+  "mae": 0.38574710407239443,
+  "rmse": 0.5316278473179168,
+  "anomalies": 40,
+  "top_drivers": {
+    "VER": 96.56174999999999,
+    "PER": 96.91332142857142,
+    "SAI": 96.95057142857142,
+    "LEC": 97.25250000000001,
+    "NOR": 97.33985714285714
+  },
+  "top_features": [
+    {
+      "feature": "SpeedFL",
+      "importance": 0.009084865123973104
+    },
+    {
+      "feature": "LapNumber",
+      "importance": 0.055638441298229195
+    },
+    {
+      "feature": "TyreLife",
+      "importance": 0.09714652690408696
+    },
+    {
+      "feature": "SpeedST",
+      "importance": 0.1342868510707022
+    },
+    {
+      "feature": "SectorBalance",
+      "importance": 0.6753703417136284
+    }
+  ]
+}

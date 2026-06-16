@@ -1,165 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Race Performance Analysis</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🏎️ F1 Live Race Simulation</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>🏎️ F1 Live Race Simulation</h1>
+                <div class="race-status">
+                    <span class="status-dot"></span>
+                    <span id="raceStatus">LIVE</span>
+                    <span id="lapCounter">Lap 1/57</span>
+                </div>
+            </div>
+        </header>
 
-    <!-- HERO SECTION -->
-    <div class="hero">
+        <!-- Main Race View -->
+        <div class="race-view">
+            <!-- Track Container -->
+            <div class="track-container">
+                <div class="track">
+                    <canvas id="trackCanvas"></canvas>
+                    
+                    <!-- Car positions overlay -->
+                    <div id="carsContainer">
+                        <!-- Cars will be rendered here by JavaScript -->
+                    </div>
+                    
+                    <!-- Track Labels -->
+                    <div class="track-labels">
+                        <span class="start-finish">🏁 START/FINISH</span>
+                        <span class="turn-label">T1</span>
+                        <span class="turn-label">T2</span>
+                        <span class="turn-label">T3</span>
+                        <span class="turn-label">T4</span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="track">
-            <div class="car">🏎️</div>
+            <!-- Timing Tower -->
+            <div class="timing-tower">
+                <h3>⏱️ LIVE TIMING</h3>
+                <div class="timing-grid" id="timingGrid">
+                    <!-- Driver timing rows will be inserted here -->
+                </div>
+            </div>
         </div>
 
-        <h1>F1 Race Performance Analysis</h1>
-        <p>Machine Learning • FastF1 • Data Analytics</p>
-
-        <div class="stats">
-
-            <div class="stat-box">
-                <h2>0.986</h2>
-                <p>R² Score</p>
+        <!-- Stats & Controls -->
+        <div class="controls-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Race Progress</span>
+                    <span class="stat-value" id="raceProgress">0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Current Leader</span>
+                    <span class="stat-value" id="currentLeader">VER</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Fastest Lap</span>
+                    <span class="stat-value" id="fastestLap">1:32.608</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Safety Car</span>
+                    <span class="stat-value" id="safetyCar">🚦 OFF</span>
+                </div>
             </div>
 
-            <div class="stat-box">
-                <h2>0.289</h2>
-                <p>MAE</p>
+            <div class="controls">
+                <button id="startRace" class="btn btn-primary">▶️ START RACE</button>
+                <button id="pauseRace" class="btn btn-warning">⏸️ PAUSE</button>
+                <button id="resetRace" class="btn btn-danger">🔄 RESET</button>
+                <button id="toggleView" class="btn btn-secondary">📊 VIEW</button>
             </div>
-
-            <div class="stat-box">
-                <h2>72.95%</h2>
-                <p>SpeedST Importance</p>
-            </div>
-
         </div>
 
+        <!-- Bottom Stats -->
+        <div class="bottom-stats">
+            <div class="chart-container">
+                <canvas id="speedChart"></canvas>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="color-box" style="background: #e10600;"></span>
+                    <span>Red Bull</span>
+                </div>
+                <div class="legend-item">
+                    <span class="color-box" style="background: #00d2be;"></span>
+                    <span>Mercedes</span>
+                </div>
+                <div class="legend-item">
+                    <span class="color-box" style="background: #dc0000;"></span>
+                    <span>Ferrari</span>
+                </div>
+                <div class="legend-item">
+                    <span class="color-box" style="background: #1e5bc6;"></span>
+                    <span>McLaren</span>
+                </div>
+                <div class="legend-item">
+                    <span class="color-box" style="background: #469b46;"></span>
+                    <span>Aston Martin</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- HEADER -->
-    <header>
-        <h1>F1 Race Performance Analysis using Machine Learning</h1>
-        <p>Developed by Nivedhitha K</p>
-    </header>
-
-    <!-- PROJECT OVERVIEW -->
-    <section>
-        <h2>Project Overview</h2>
-
-        <p>
-            This project analyzes Formula 1 Bahrain Grand Prix 2024 race data using
-            Python, FastF1, Machine Learning, and Data Visualization techniques.
-        </p>
-    </section>
-
-    <!-- OBJECTIVE -->
-    <section>
-        <h2>Objective</h2>
-
-        <p>
-            Predict Formula 1 lap times using a Random Forest Regression model and
-            identify key performance factors affecting race outcomes.
-        </p>
-    </section>
-
-    <!-- TOOLS -->
-    <section>
-        <h2>Tools Used</h2>
-
-        <ul>
-            <li>Python</li>
-            <li>Pandas</li>
-            <li>FastF1</li>
-            <li>Matplotlib</li>
-            <li>Seaborn</li>
-            <li>Scikit-Learn</li>
-        </ul>
-    </section>
-
-    <!-- RESULTS -->
-    <section>
-
-        <h2>Results</h2>
-
-        <div class="card">
-            <h3>Model Performance</h3>
-            <p>MAE: 0.289 seconds</p>
-            <p>R² Score: 0.986</p>
-        </div>
-
-        <div class="card">
-            <h3>Feature Importance</h3>
-            <p>SpeedST: 72.95%</p>
-            <p>TyreLife: 17.83%</p>
-            <p>LapNumber: 5.02%</p>
-        </div>
-
-    </section>
-
-    <!-- RACE SIMULATION -->
-    <section>
-
-        <h2>Race Simulation</h2>
-
-        <h3>
-            Current Lap:
-            <span id="lapCounter">1</span>
-        </h3>
-
-        <div class="track">
-            <div class="car">🏎️</div>
-        </div>
-
-        <p>
-            Bahrain Grand Prix consists of 57 laps. The lap counter below simulates race progression.
-        </p>
-
-    </section>
-
-    <!-- VISUALIZATIONS -->
-    <section>
-
-        <h2>Project Visualizations</h2>
-
-        <img src="plots/lap_distribution.png" alt="Lap Distribution">
-
-        <img src="plots/compound_boxplot.png" alt="Compound Analysis">
-
-        <img src="plots/sector_comparison.png" alt="Sector Analysis">
-
-        <img src="plots/speed_correlation.png" alt="Speed Correlation">
-
-        <img src="plots/anomaly_detection.png" alt="Anomaly Detection">
-
-        <img src="plots/predicted_vs_actual.png" alt="Predicted vs Actual">
-
-        <img src="plots/feature_importance.png" alt="Feature Importance">
-
-    </section>
-
-    <!-- CONCLUSION -->
-    <section>
-
-        <h2>Conclusion</h2>
-
-        <p>
-            Speed Trap Speed and Tyre Life were the most influential factors affecting
-            lap time performance. The Random Forest model achieved high predictive
-            accuracy with an R² Score of 0.986 and MAE of 0.289 seconds.
-        </p>
-
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-        <p>© 2026 Nivedhitha K | F1 Race Analysis Project</p>
-    </footer>
-
     <script src="script.js"></script>
-
 </body>
 </html>
