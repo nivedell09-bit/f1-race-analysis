@@ -1,6 +1,6 @@
 // =============================================
-// F1 LIVE RACE SIMULATION
-// Complete with animations and real-time updates
+// F1 LIVE RACE SIMULATION - FIXED VERSION
+// Proper lap counting and race simulation
 // =============================================
 
 class F1RaceSimulation {
@@ -11,6 +11,8 @@ class F1RaceSimulation {
         this.isRacing = false;
         this.isPaused = false;
         this.simulationSpeed = 1;
+        this.lapProgress = 0; // Track progress within a lap
+        this.lapTime = 0; // Current lap time in seconds
         
         // Driver data (from actual F1 2024 Bahrain GP)
         this.drivers = [
@@ -28,19 +30,19 @@ class F1RaceSimulation {
         
         // Initial positions (qualifying order)
         this.positions = [
-            { driver: 'VER', position: 1, lapTime: 96.56, gap: 0 },
-            { driver: 'PER', position: 2, lapTime: 96.91, gap: 0.35 },
-            { driver: 'SAI', position: 3, lapTime: 96.95, gap: 0.39 },
-            { driver: 'LEC', position: 4, lapTime: 97.25, gap: 0.69 },
-            { driver: 'NOR', position: 5, lapTime: 97.34, gap: 0.78 },
-            { driver: 'PIA', position: 6, lapTime: 97.50, gap: 0.94 },
-            { driver: 'HAM', position: 7, lapTime: 97.65, gap: 1.09 },
-            { driver: 'RUS', position: 8, lapTime: 97.80, gap: 1.24 },
-            { driver: 'ALO', position: 9, lapTime: 98.10, gap: 1.54 },
-            { driver: 'STR', position: 10, lapTime: 98.30, gap: 1.74 }
+            { driver: 'VER', position: 1, lapTime: 96.56, gap: 0, totalTime: 0 },
+            { driver: 'PER', position: 2, lapTime: 96.91, gap: 0.35, totalTime: 0 },
+            { driver: 'SAI', position: 3, lapTime: 96.95, gap: 0.39, totalTime: 0 },
+            { driver: 'LEC', position: 4, lapTime: 97.25, gap: 0.69, totalTime: 0 },
+            { driver: 'NOR', position: 5, lapTime: 97.34, gap: 0.78, totalTime: 0 },
+            { driver: 'PIA', position: 6, lapTime: 97.50, gap: 0.94, totalTime: 0 },
+            { driver: 'HAM', position: 7, lapTime: 97.65, gap: 1.09, totalTime: 0 },
+            { driver: 'RUS', position: 8, lapTime: 97.80, gap: 1.24, totalTime: 0 },
+            { driver: 'ALO', position: 9, lapTime: 98.10, gap: 1.54, totalTime: 0 },
+            { driver: 'STR', position: 10, lapTime: 98.30, gap: 1.74, totalTime: 0 }
         ];
         
-        // Track positions for car animation (x, y percentages)
+        // Track positions for car animation
         this.trackPath = this.generateTrackPath();
         
         // Speed chart data
@@ -51,12 +53,10 @@ class F1RaceSimulation {
     }
     
     generateTrackPath() {
-        // Generate a racing line around the track
         const points = [];
         const numPoints = 100;
         for (let i = 0; i < numPoints; i++) {
             const t = i / numPoints;
-            // Oval track shape
             const angle = t * 2 * Math.PI;
             const x = 50 + 40 * Math.cos(angle);
             const y = 50 + 30 * Math.sin(angle) + 5 * Math.sin(angle * 3);
@@ -77,15 +77,12 @@ class F1RaceSimulation {
         const canvas = document.getElementById('trackCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Set canvas size
         const rect = canvas.parentElement.getBoundingClientRect();
         canvas.width = rect.width;
         canvas.height = rect.height;
         
-        // Draw track
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Track background
         const gradient = ctx.createRadialGradient(
             canvas.width/2, canvas.height/2, 0,
             canvas.width/2, canvas.height/2, canvas.width/2
@@ -95,13 +92,11 @@ class F1RaceSimulation {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Track path
         ctx.beginPath();
         const trackWidth = Math.min(canvas.width, canvas.height) * 0.3;
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         
-        // Draw track outline
         for (let i = 0; i <= 100; i++) {
             const t = i / 100;
             const angle = t * 2 * Math.PI;
@@ -112,12 +107,10 @@ class F1RaceSimulation {
             else ctx.lineTo(x, y);
         }
         ctx.closePath();
-        
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 4;
         ctx.stroke();
         
-        // Track inner line
         ctx.beginPath();
         for (let i = 0; i <= 100; i++) {
             const t = i / 100;
@@ -135,30 +128,24 @@ class F1RaceSimulation {
         ctx.stroke();
         ctx.setLineDash([]);
         
-        // Start/Finish line
         ctx.fillStyle = '#fff';
         ctx.font = '14px Arial';
         ctx.fillText('🏁 START/FINISH', canvas.width/2 - 60, canvas.height - 30);
         
-        // Pit lane
         ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.fillRect(10, canvas.height/2 - 10, 60, 20);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.font = '10px Arial';
         ctx.fillText('PIT', 15, canvas.height/2 + 4);
         
-        // Store track data for car positioning
         this.trackData = { centerX, centerY, trackWidth };
     }
     
     renderCars() {
         const container = document.getElementById('carsContainer');
         container.innerHTML = '';
-        
-        // Clear existing cars
         this.carElements = {};
         
-        // Create car elements
         this.positions.forEach((pos, index) => {
             const driver = this.drivers.find(d => d.id === pos.driver);
             if (!driver) return;
@@ -172,13 +159,11 @@ class F1RaceSimulation {
             car.style.fontSize = '24px';
             car.style.transition = 'all 0.3s ease';
             
-            // Car emoji with driver label
             car.innerHTML = `
                 🏎️
                 <span class="driver-label">${driver.id}</span>
             `;
             
-            // Set initial position
             const progress = (this.currentLap / this.totalLaps) + (index / this.positions.length * 0.1);
             const position = this.getTrackPosition(progress);
             car.style.left = position.x + '%';
@@ -191,16 +176,12 @@ class F1RaceSimulation {
     }
     
     getTrackPosition(progress) {
-        // Get position on track based on progress (0-1)
         const t = progress % 1;
         const angle = t * 2 * Math.PI;
-        const { centerX, centerY, trackWidth } = this.trackData;
         
-        // Convert to percentage
         const x = 50 + 40 * Math.cos(angle);
         const y = 50 + 30 * Math.sin(angle) + 5 * Math.sin(angle * 3);
         
-        // Calculate rotation (tangent to path)
         const nextAngle = ((t + 0.01) % 1) * 2 * Math.PI;
         const nextX = 50 + 40 * Math.cos(nextAngle);
         const nextY = 50 + 30 * Math.sin(nextAngle) + 5 * Math.sin(nextAngle * 3);
@@ -213,7 +194,6 @@ class F1RaceSimulation {
         const grid = document.getElementById('timingGrid');
         grid.innerHTML = '';
         
-        // Sort by position
         const sorted = [...this.positions].sort((a, b) => a.position - b.position);
         
         sorted.forEach((pos, index) => {
@@ -223,18 +203,15 @@ class F1RaceSimulation {
             const row = document.createElement('div');
             row.className = 'timing-row';
             
-            // Add some randomness to make it look live
-            const randomGap = (Math.random() * 0.5 - 0.25) * this.simulationSpeed;
-            const displayGap = pos.gap + randomGap;
+            const displayTime = pos.lapTime + (pos.gap || 0);
             
             row.innerHTML = `
                 <span class="pos">${index + 1}</span>
                 <span class="car" style="color: ${driver.color}">${driver.id}</span>
                 <span class="driver">${driver.name}</span>
-                <span class="time">${this.formatTime(pos.lapTime + displayGap)}</span>
+                <span class="time">${this.formatTime(displayTime)}</span>
             `;
             
-            // Highlight leader
             if (index === 0) {
                 row.style.background = 'rgba(255, 215, 0, 0.1)';
                 row.style.border = '1px solid gold';
@@ -243,7 +220,6 @@ class F1RaceSimulation {
             grid.appendChild(row);
         });
         
-        // Update stats
         if (sorted.length > 0) {
             document.getElementById('currentLeader').textContent = sorted[0].driver;
             document.getElementById('fastestLap').textContent = this.formatTime(Math.min(...this.positions.map(p => p.lapTime)));
@@ -251,19 +227,25 @@ class F1RaceSimulation {
     }
     
     updatePositions() {
-        // Simulate position changes during race
-        this.positions.forEach(pos => {
-            // Random performance variation
-            const variation = (Math.random() - 0.5) * 0.5 * this.simulationSpeed;
-            pos.lapTime += variation;
+        // Simulate position changes based on performance
+        this.positions.forEach((pos, index) => {
+            // Each driver has slightly different pace
+            const baseLapTime = pos.lapTime;
+            const variation = (Math.random() - 0.5) * 0.3 * this.simulationSpeed;
+            
+            // Update lap time for this driver
+            const newLapTime = baseLapTime + variation;
+            pos.lapTime = newLapTime;
+            pos.totalTime += newLapTime;
             
             // Some drivers gain/lose positions
-            if (Math.random() < 0.1 * this.simulationSpeed) {
+            if (Math.random() < 0.05 * this.simulationSpeed) {
                 const change = Math.random() > 0.5 ? 1 : -1;
                 const newPos = pos.position + change;
                 if (newPos >= 1 && newPos <= this.positions.length) {
                     const other = this.positions.find(p => p.position === newPos);
-                    if (other) {
+                    if (other && other.driver !== pos.driver) {
+                        // Swap positions
                         const tempPos = pos.position;
                         pos.position = other.position;
                         other.position = tempPos;
@@ -271,8 +253,15 @@ class F1RaceSimulation {
                 }
             }
         });
+    }
+    
+    simulateLapProgress() {
+        if (!this.isRacing || this.isPaused) return;
         
-        // Update car positions on track
+        // Increment lap progress (each step is 1/100th of a lap)
+        this.lapProgress += 0.01 * this.simulationSpeed;
+        
+        // Update car positions based on progress
         this.positions.forEach((pos, index) => {
             const driver = this.drivers.find(d => d.id === pos.driver);
             if (!driver) return;
@@ -280,25 +269,31 @@ class F1RaceSimulation {
             const car = this.carElements[driver.id];
             if (!car) return;
             
-            const progress = (this.currentLap / this.totalLaps) + (pos.position / this.positions.length * 0.1);
+            // Calculate progress offset for each car based on position
+            const offset = (pos.position - 1) * 0.02;
+            const progress = (this.currentLap + this.lapProgress + offset) / this.totalLaps;
             const position = this.getTrackPosition(progress);
+            
             car.style.left = position.x + '%';
             car.style.top = position.y + '%';
             car.style.transform = `rotate(${position.rotation}deg)`;
             
-            // Highlight leader
             if (pos.position === 1) {
                 car.style.filter = 'drop-shadow(0 0 10px gold)';
             } else {
                 car.style.filter = 'none';
             }
         });
+        
+        // Check if lap is complete (progress >= 1)
+        if (this.lapProgress >= 1) {
+            this.completeLap();
+        }
     }
     
-    simulateLap() {
-        if (!this.isRacing || this.isPaused) return;
-        
+    completeLap() {
         this.currentLap++;
+        this.lapProgress = 0;
         
         // Update positions
         this.updatePositions();
@@ -328,19 +323,16 @@ class F1RaceSimulation {
         canvas.width = rect.width;
         canvas.height = rect.height;
         
-        // Add random speed data
         const speed = 200 + Math.random() * 100;
         this.speedHistory.push(speed);
         if (this.speedHistory.length > 50) this.speedHistory.shift();
         
-        // Draw chart
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         const padding = 20;
         const chartWidth = canvas.width - padding * 2;
         const chartHeight = canvas.height - padding * 2;
         
-        // Draw grid
         ctx.strokeStyle = 'rgba(255,255,255,0.1)';
         ctx.lineWidth = 0.5;
         for (let i = 0; i < 5; i++) {
@@ -351,7 +343,6 @@ class F1RaceSimulation {
             ctx.stroke();
         }
         
-        // Draw speed line
         if (this.speedHistory.length > 1) {
             ctx.beginPath();
             ctx.strokeStyle = '#e10600';
@@ -366,7 +357,6 @@ class F1RaceSimulation {
             });
             ctx.stroke();
             
-            // Area fill
             const lastX = padding + ((this.speedHistory.length - 1) / (this.speedHistory.length - 1)) * chartWidth;
             ctx.lineTo(lastX, padding + chartHeight);
             ctx.lineTo(padding, padding + chartHeight);
@@ -387,9 +377,10 @@ class F1RaceSimulation {
         
         if (this.interval) return;
         
+        // Update every 100ms for smooth animation
         this.interval = setInterval(() => {
-            this.simulateLap();
-        }, 500 / this.simulationSpeed);
+            this.simulateLapProgress();
+        }, 100);
     }
     
     pauseRace() {
@@ -403,6 +394,7 @@ class F1RaceSimulation {
         this.isRacing = false;
         this.isPaused = false;
         this.currentLap = 0;
+        this.lapProgress = 0;
         this.speedHistory = [];
         
         if (this.interval) {
@@ -410,18 +402,17 @@ class F1RaceSimulation {
             this.interval = null;
         }
         
-        // Reset positions
         this.positions = [
-            { driver: 'VER', position: 1, lapTime: 96.56, gap: 0 },
-            { driver: 'PER', position: 2, lapTime: 96.91, gap: 0.35 },
-            { driver: 'SAI', position: 3, lapTime: 96.95, gap: 0.39 },
-            { driver: 'LEC', position: 4, lapTime: 97.25, gap: 0.69 },
-            { driver: 'NOR', position: 5, lapTime: 97.34, gap: 0.78 },
-            { driver: 'PIA', position: 6, lapTime: 97.50, gap: 0.94 },
-            { driver: 'HAM', position: 7, lapTime: 97.65, gap: 1.09 },
-            { driver: 'RUS', position: 8, lapTime: 97.80, gap: 1.24 },
-            { driver: 'ALO', position: 9, lapTime: 98.10, gap: 1.54 },
-            { driver: 'STR', position: 10, lapTime: 98.30, gap: 1.74 }
+            { driver: 'VER', position: 1, lapTime: 96.56, gap: 0, totalTime: 0 },
+            { driver: 'PER', position: 2, lapTime: 96.91, gap: 0.35, totalTime: 0 },
+            { driver: 'SAI', position: 3, lapTime: 96.95, gap: 0.39, totalTime: 0 },
+            { driver: 'LEC', position: 4, lapTime: 97.25, gap: 0.69, totalTime: 0 },
+            { driver: 'NOR', position: 5, lapTime: 97.34, gap: 0.78, totalTime: 0 },
+            { driver: 'PIA', position: 6, lapTime: 97.50, gap: 0.94, totalTime: 0 },
+            { driver: 'HAM', position: 7, lapTime: 97.65, gap: 1.09, totalTime: 0 },
+            { driver: 'RUS', position: 8, lapTime: 97.80, gap: 1.24, totalTime: 0 },
+            { driver: 'ALO', position: 9, lapTime: 98.10, gap: 1.54, totalTime: 0 },
+            { driver: 'STR', position: 10, lapTime: 98.30, gap: 1.74, totalTime: 0 }
         ];
         
         document.getElementById('raceStatus').textContent = '🔄 RESET';
@@ -445,7 +436,6 @@ class F1RaceSimulation {
         document.getElementById('raceStatus').textContent = '🏆 RACE COMPLETE!';
         document.getElementById('startRace').textContent = '✅ FINISHED';
         
-        // Celebration effect
         const winner = this.positions.find(p => p.position === 1);
         if (winner) {
             document.getElementById('currentLeader').textContent = `🏆 ${winner.driver}`;
@@ -462,7 +452,6 @@ class F1RaceSimulation {
     startClock() {
         setInterval(() => {
             if (this.isRacing && !this.isPaused) {
-                // Update live timing with slight variations
                 this.updateTiming();
             }
         }, 1000);
@@ -478,7 +467,6 @@ class F1RaceSimulation {
             tower.style.display = tower.style.display === 'none' ? 'block' : 'none';
         });
         
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === ' ' || e.key === 'Space') {
                 e.preventDefault();
@@ -490,7 +478,6 @@ class F1RaceSimulation {
             }
         });
         
-        // Window resize
         window.addEventListener('resize', () => {
             this.renderTrack();
             this.renderCars();
@@ -498,10 +485,8 @@ class F1RaceSimulation {
     }
 }
 
-// Initialize the simulation when page loads
+// Initialize the simulation
 document.addEventListener('DOMContentLoaded', () => {
     const race = new F1RaceSimulation();
-    
-    // Expose for debugging
     window.raceSimulation = race;
 });
