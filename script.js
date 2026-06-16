@@ -1,6 +1,6 @@
 // =============================================
-// F1 RACE SIMULATION - FIXED VERSION
-// Old design restored, lap counting fixed, cars sped up
+// F1 RACE SIMULATION - SUPER FAST VERSION
+// Cars move fast, lap counting correct, 10 cars
 // =============================================
 
 class F1RaceSimulation {
@@ -10,10 +10,10 @@ class F1RaceSimulation {
         this.currentLap = 0;
         this.isRacing = false;
         this.isPaused = false;
-        this.simulationSpeed = 2; // 🚀 Increased speed (was 1)
+        this.simulationSpeed = 4; // 🚀 MUCH FASTER (was 2)
         this.lapProgress = 0;
         
-        // 10 drivers (all cars)
+        // 10 drivers
         this.drivers = [
             { id: 'VER', name: 'Verstappen', team: 'Red Bull', color: '#e10600' },
             { id: 'PER', name: 'Perez', team: 'Red Bull', color: '#e10600' },
@@ -65,7 +65,6 @@ class F1RaceSimulation {
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Background
         const gradient = ctx.createRadialGradient(
             canvas.width/2, canvas.height/2, 0,
             canvas.width/2, canvas.height/2, canvas.width/2
@@ -75,7 +74,6 @@ class F1RaceSimulation {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Track outline
         const trackWidth = Math.min(canvas.width, canvas.height) * 0.3;
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
@@ -94,7 +92,6 @@ class F1RaceSimulation {
         ctx.lineWidth = 4;
         ctx.stroke();
         
-        // Inner dashed line
         ctx.beginPath();
         for (let i = 0; i <= 100; i++) {
             const t = i / 100;
@@ -111,7 +108,6 @@ class F1RaceSimulation {
         ctx.stroke();
         ctx.setLineDash([]);
         
-        // Labels
         ctx.fillStyle = '#fff';
         ctx.font = '14px Arial';
         ctx.fillText('🏁 START/FINISH', canvas.width/2 - 60, canvas.height - 30);
@@ -140,7 +136,7 @@ class F1RaceSimulation {
             car.style.width = '30px';
             car.style.height = '15px';
             car.style.fontSize = '24px';
-            car.style.transition = 'all 0.1s ease'; // faster transition
+            car.style.transition = 'all 0.05s ease'; // faster transition
             
             car.innerHTML = `
                 🏎️
@@ -207,13 +203,12 @@ class F1RaceSimulation {
         }
     }
     
-    // ========== FIXED LAP LOGIC ==========
     simulateLapProgress() {
         if (!this.isRacing || this.isPaused) return;
         
-        this.lapProgress += 0.02 * this.simulationSpeed; // 🚀 faster steps
+        // 🚀 Much larger step for faster movement
+        this.lapProgress += 0.05 * this.simulationSpeed;
         
-        // Update car positions
         this.positions.forEach((pos, index) => {
             const driver = this.drivers.find(d => d.id === pos.driver);
             if (!driver) return;
@@ -244,7 +239,6 @@ class F1RaceSimulation {
         this.currentLap++;
         this.lapProgress = 0;
         
-        // Update positions and timing
         this.updatePositions();
         this.updateTiming();
         
@@ -333,9 +327,10 @@ class F1RaceSimulation {
         document.getElementById('startRace').style.opacity = '0.7';
         
         if (this.interval) return;
+        // Faster update interval = smoother and quicker movement
         this.interval = setInterval(() => {
             this.simulateLapProgress();
-        }, 100); // 100ms update
+        }, 50); // 50ms (was 100ms)
     }
     
     pauseRace() {
