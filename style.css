@@ -1,3 +1,26 @@
+.hero{
+    background: linear-gradient(to right, #e10600, #111);
+    color:white;
+    text-align:center;
+    padding:80px 20px;
+    overflow:hidden;
+}
+
+.car{
+    font-size:60px;
+    position:relative;
+    animation: race 5s linear infinite;
+}
+
+@keyframes race{
+    from{
+        left:-100%;
+    }
+    to{
+        left:100%;
+    }
+}
+
 body{
     font-family: Arial, sans-serif;
     margin:0;
@@ -26,9 +49,16 @@ h2{
 
 .card{
     background:#fafafa;
-    padding:15px;
-    margin:10px 0;
+    padding:20px;
+    margin:15px 0;
     border-left:5px solid #e10600;
+    border-radius:8px;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
 }
 
 img{

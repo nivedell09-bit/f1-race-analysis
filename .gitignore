@@ -1,20 +1,3 @@
-# Python cache files
+f1_cache/
 __pycache__/
 *.pyc
-
-# Virtual environments
-venv/
-.env/
-
-# FastF1 cache
-f1_cache/
-
-# VS Code settings
-.vscode/
-
-# Jupyter Notebook files
-.ipynb_checkpoints/
-
-# Operating system files
-.DS_Store
-Thumbs.db

@@ -1,439 +1,290 @@
-# ==========================================
-# F1 Race Analysis Project
-# Author: Nivedhitha K
-# ==========================================
+"""
+F1 Race Performance Analysis - AI/ML Project
+Complete Data Science Pipeline for Bahrain GP 2024
+"""
 
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, r2_score
-
-import os
+# ============ PART 1: IMPORTS ============
 import fastf1
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# ==========================================
-# CREATE FOLDERS
-# ==========================================
+# Set style for beautiful plots
+sns.set_theme(style='darkgrid')
+plt.rcParams['figure.figsize'] = (10, 6)
 
-os.makedirs("plots", exist_ok=True)
-os.makedirs("f1_cache", exist_ok=True)
+# Create plots folder if it doesn't exist
+import os
+if not os.path.exists('plots'):
+    os.makedirs('plots')
 
-# ==========================================
-# LOAD F1 DATA
-# ==========================================
+print("=" * 60)
+print("F1 RACE PERFORMANCE ANALYSIS - BAHRAIN GP 2024")
+print("=" * 60)
 
-print("=" * 50)
-print("LOADING F1 DATA")
-print("=" * 50)
+# ============ PART 2: DATA COLLECTION ============
+print("\n📥 STEP 1: Loading F1 data...")
 
-fastf1.Cache.enable_cache("f1_cache")
+# Enable cache to avoid re-downloading
+fastf1.Cache.enable_cache('f1_cache')
 
-session = fastf1.get_session(2024, "Bahrain", "R")
-
-print("Loading race data...")
-
+# Load Bahrain GP 2024 race session
+session = fastf1.get_session(2024, 'Bahrain', 'R')
 session.load()
 
+# Get lap data
 laps = session.laps
+print(f"✅ Data loaded! Shape: {laps.shape}")
+print(f"Columns available: {list(laps.columns)[:10]}...")
 
-print("\nData Loaded Successfully!")
+# ============ PART 3: DATA CLEANING ============
+print("\n🧹 STEP 2: Cleaning data...")
 
-print("\nShape:")
-print(laps.shape)
-
-print("\nColumns:")
-print(laps.columns)
-
-print("\nFirst 5 Rows:")
-print(laps.head())
-
-# ==========================================
-# DATA CLEANING
-# ==========================================
-
-print("\n" + "=" * 50)
-print("DATA CLEANING")
-print("=" * 50)
+# Keep only relevant columns
+keep_cols = ['Driver', 'Team', 'LapNumber', 'LapTime', 'Sector1Time', 
+             'Sector2Time', 'Sector3Time', 'Compound', 'TyreLife', 
+             'SpeedI1', 'SpeedI2', 'SpeedFL', 'SpeedST']
+laps = laps[keep_cols].copy()
 
 rows_before = len(laps)
 
-columns_needed = [
-    "Driver",
-    "Team",
-    "LapNumber",
-    "LapTime",
-    "Sector1Time",
-    "Sector2Time",
-    "Sector3Time",
-    "Compound",
-    "TyreLife",
-    "SpeedI1",
-    "SpeedI2",
-    "SpeedFL",
-    "SpeedST"
-]
+# Convert time columns to seconds
+laps['LapTime_sec'] = laps['LapTime'].dt.total_seconds()
+laps['S1_sec'] = laps['Sector1Time'].dt.total_seconds()
+laps['S2_sec'] = laps['Sector2Time'].dt.total_seconds()
+laps['S3_sec'] = laps['Sector3Time'].dt.total_seconds()
 
-laps = laps[columns_needed].copy()
-
-time_columns = [
-    "LapTime",
-    "Sector1Time",
-    "Sector2Time",
-    "Sector3Time"
-]
-
-for col in time_columns:
-    laps[col] = laps[col].dt.total_seconds()
-
-laps.dropna(inplace=True)
-
-laps = laps[laps["LapTime"] <= 120]
-
-laps.reset_index(drop=True, inplace=True)
+# Remove invalid laps
+laps = laps[laps['LapTime_sec'].notna()]
+laps = laps[laps['LapTime_sec'] <= 120]  # Remove laps > 120 seconds
+laps = laps[laps['S1_sec'].notna() & laps['S2_sec'].notna() & laps['S3_sec'].notna()]
 
 rows_after = len(laps)
+print(f"Cleaned data: {rows_before} rows → {rows_after} rows")
+print(f"Removed: {rows_before - rows_after} invalid laps")
 
-print(f"Rows Before Cleaning : {rows_before}")
-print(f"Rows After Cleaning  : {rows_after}")
-print(f"Rows Removed         : {rows_before - rows_after}")
+# ============ PART 4: EXPLORATORY DATA ANALYSIS ============
+print("\n📊 STEP 3: Exploratory Data Analysis...")
 
-print("\nClean Dataset Preview:")
-print(laps.head())
-
-# ==========================================
-# TASK 3 - LAP TIME DISTRIBUTION
-# ==========================================
-
-print("\n" + "=" * 50)
-print("LAP TIME DISTRIBUTION")
-print("=" * 50)
-
-sns.set_style("whitegrid")
-
+# 3.1 Lap Time Distribution Histogram
 plt.figure(figsize=(10, 6))
-
-sns.histplot(
-    data=laps,
-    x="LapTime",
-    bins=30,
-    kde=True
-)
-
-mean_time = laps["LapTime"].mean()
-median_time = laps["LapTime"].median()
-
-plt.axvline(
-    mean_time,
-    linestyle="--",
-    linewidth=2,
-    label=f"Mean = {mean_time:.2f}s"
-)
-
-plt.axvline(
-    median_time,
-    linestyle=":",
-    linewidth=2,
-    label=f"Median = {median_time:.2f}s"
-)
-
-plt.title("F1 Bahrain GP 2024 - Lap Time Distribution")
-plt.xlabel("Lap Time (Seconds)")
-plt.ylabel("Frequency")
+plt.hist(laps['LapTime_sec'], bins=30, color='skyblue', edgecolor='black', alpha=0.7)
+mean_time = laps['LapTime_sec'].mean()
+median_time = laps['LapTime_sec'].median()
+plt.axvline(mean_time, color='gold', linestyle='--', linewidth=2, label=f'Mean: {mean_time:.2f}s')
+plt.axvline(median_time, color='teal', linestyle='--', linewidth=2, label=f'Median: {median_time:.2f}s')
+plt.xlabel('Lap Time (seconds)', fontsize=12)
+plt.ylabel('Frequency', fontsize=12)
+plt.title('Lap Time Distribution - Bahrain GP 2024', fontsize=14)
 plt.legend()
+plt.savefig('plots/lap_distribution.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/lap_distribution.png")
 
-plt.savefig(
-    "plots/lap_distribution.png",
-    dpi=300,
-    bbox_inches="tight"
-)
+# 3.2 Boxplot by Tyre Compound
+plt.figure(figsize=(10, 6))
+compound_colors = {'SOFT': 'red', 'MEDIUM': 'gold', 'HARD': 'grey'}
+order = ['SOFT', 'MEDIUM', 'HARD']
+sns.boxplot(data=laps, x='Compound', y='LapTime_sec', order=order, 
+            palette=compound_colors)
+plt.xlabel('Tyre Compound', fontsize=12)
+plt.ylabel('Lap Time (seconds)', fontsize=12)
+plt.title('Lap Time Distribution by Tyre Compound', fontsize=14)
+plt.savefig('plots/compound_boxplot.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/compound_boxplot.png")
 
-plt.show()
+# 3.3 Fastest drivers by average lap time
+fastest_drivers = laps.groupby('Driver')['LapTime_sec'].mean().sort_values().head()
+print("\n🏆 Top 5 Fastest Drivers (avg lap time):")
+for driver, time in fastest_drivers.items():
+    print(f"   {driver}: {time:.2f} seconds")
 
-print("Graph saved successfully!")
+# 3.4 Sector times comparison
+sector_avg = laps.groupby('Driver')[['S1_sec', 'S2_sec', 'S3_sec']].mean()
+sector_avg['Total'] = sector_avg.sum(axis=1)
+sector_avg_sorted = sector_avg.sort_values('Total').head(8)
 
-# ==========================================
-# TASK 4 - TYRE COMPOUND ANALYSIS
-# ==========================================
+plt.figure(figsize=(12, 6))
+x = np.arange(len(sector_avg_sorted))
+width = 0.25
+plt.bar(x - width, sector_avg_sorted['S1_sec'], width, label='Sector 1', color='#FF6B6B')
+plt.bar(x, sector_avg_sorted['S2_sec'], width, label='Sector 2', color='#4ECDC4')
+plt.bar(x + width, sector_avg_sorted['S3_sec'], width, label='Sector 3', color='#45B7D1')
+plt.xlabel('Driver', fontsize=12)
+plt.ylabel('Sector Time (seconds)', fontsize=12)
+plt.title('Average Sector Times by Driver', fontsize=14)
+plt.xticks(x, sector_avg_sorted.index, rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.savefig('plots/sector_comparison.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/sector_comparison.png")
 
-print("\n" + "=" * 50)
-print("TYRE COMPOUND ANALYSIS")
-print("=" * 50)
+# 3.5 Speed correlation
+correlation = laps['SpeedST'].corr(laps['LapTime_sec'])
+print(f"\n📈 Correlation between SpeedST and LapTime: {correlation:.3f}")
+print(f"   Interpretation: {'Negative (faster speed = better lap time)' if correlation < 0 else 'Positive'}")
 
 plt.figure(figsize=(10, 6))
+sns.scatterplot(data=laps, x='SpeedST', y='LapTime_sec', hue='Compound', 
+                palette=compound_colors, alpha=0.6)
+sns.regplot(data=laps, x='SpeedST', y='LapTime_sec', scatter=False, color='black', line_kws={'linewidth': 2})
+plt.xlabel('Speed Trap (km/h)', fontsize=12)
+plt.ylabel('Lap Time (seconds)', fontsize=12)
+plt.title('Speed Trap vs Lap Time', fontsize=14)
+plt.legend(title='Compound')
+plt.savefig('plots/speed_correlation.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/speed_correlation.png")
 
-sns.boxplot(
-    data=laps,
-    x="Compound",
-    y="LapTime"
-)
+# ============ PART 5: FEATURE ENGINEERING ============
+print("\n🔧 STEP 4: Feature Engineering...")
 
-plt.title("Lap Time Comparison by Tyre Compound")
-plt.xlabel("Tyre Compound")
-plt.ylabel("Lap Time (Seconds)")
+# Create new features
+laps['SectorBalance'] = laps['S1_sec'] - laps['S3_sec']
 
-plt.savefig(
-    "plots/compound_boxplot.png",
-    dpi=300,
-    bbox_inches="tight"
-)
+# Bin TyreLife
+laps['TyreAgeBucket'] = pd.cut(laps['TyreLife'], bins=[0, 10, 25, 100], 
+                                labels=['Fresh', 'Used', 'Old'])
 
-plt.show()
+# Encode categorical variables
+compound_dummies = pd.get_dummies(laps['Compound'], prefix='Tyre')
+tyreage_dummies = pd.get_dummies(laps['TyreAgeBucket'], prefix='Age')
+laps = pd.concat([laps, compound_dummies, tyreage_dummies], axis=1)
 
-print("Compound boxplot saved successfully!")
+# Encode Driver as numeric
+le = LabelEncoder()
+laps['Driver_encoded'] = le.fit_transform(laps['Driver'])
 
-# ==========================================
-# TASK 5 - SECTOR ANALYSIS
-# ==========================================
+# Define features X and target y
+feature_cols = ['LapNumber', 'TyreLife', 'SectorBalance', 'SpeedI1', 'SpeedI2', 
+                'SpeedFL', 'SpeedST', 'Driver_encoded'] + \
+               list(compound_dummies.columns) + list(tyreage_dummies.columns)
 
-print("\n" + "=" * 50)
-print("SECTOR ANALYSIS")
-print("=" * 50)
+X = laps[feature_cols]
+y = laps['LapTime_sec']
 
-sector_avg = laps.groupby("Driver")[
-    ["Sector1Time", "Sector2Time", "Sector3Time"]
-].mean()
+print(f"Feature matrix shape: {X.shape}")
+print(f"Features: {feature_cols}")
+print(f"No nulls? {not X.isnull().any().any()}")
 
-sector_avg.plot(
-    kind="bar",
-    figsize=(14, 7)
-)
+# ============ PART 6: TRAIN RANDOM FOREST MODEL ============
+print("\n🤖 STEP 5: Training Random Forest Model...")
 
-plt.title("Average Sector Times by Driver")
-plt.xlabel("Driver")
-plt.ylabel("Time (Seconds)")
-plt.legend(title="Sectors")
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-plt.savefig(
-    "plots/sector_comparison.png",
-    dpi=300,
-    bbox_inches="tight"
-)
+# Train model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
 
-plt.show()
+# Predict and evaluate
+y_pred = rf_model.predict(X_test)
 
-print("Sector comparison graph saved successfully!")
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
 
-# ==========================================
-# TASK 6 - SPEED CORRELATION ANALYSIS
-# ==========================================
+print(f"\n📊 Model Performance:")
+print(f"   MAE (Mean Absolute Error): {mae:.3f} seconds")
+print(f"   RMSE (Root Mean Square Error): {rmse:.3f} seconds")
+print(f"   R² Score: {r2:.3f}")
+print(f"   {'✅ Good model!' if r2 > 0.85 else '⚠️ R² below target (0.85)'}")
 
-print("\n" + "=" * 50)
-print("SPEED CORRELATION ANALYSIS")
-print("=" * 50)
+# Plot predicted vs actual
+plt.figure(figsize=(10, 6))
+plt.scatter(y_test, y_pred, alpha=0.5, color='steelblue')
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 
+         'r--', lw=2, label='Perfect Prediction')
+plt.xlabel('Actual Lap Time (seconds)', fontsize=12)
+plt.ylabel('Predicted Lap Time (seconds)', fontsize=12)
+plt.title(f'Random Forest: Predicted vs Actual Lap Time (R² = {r2:.3f})', fontsize=14)
+plt.legend()
+plt.savefig('plots/predicted_vs_actual.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/predicted_vs_actual.png")
 
-correlation = laps["SpeedST"].corr(laps["LapTime"])
-
-print(f"Correlation between SpeedST and LapTime: {correlation:.4f}")
-
-print("\nCorrelation Interpretation:")
-print(
-    f"A strong negative correlation ({correlation:.4f}) was observed between "
-    "Speed Trap Speed (SpeedST) and Lap Time. "
-    "This indicates that higher speeds are generally associated with lower lap times, "
-    "resulting in faster performance."
-)
+# Feature importance
+importances = rf_model.feature_importances_
+feature_imp_df = pd.DataFrame({'Feature': feature_cols, 'Importance': importances})
+feature_imp_df = feature_imp_df.sort_values('Importance', ascending=True).tail(10)
 
 plt.figure(figsize=(10, 6))
+plt.barh(feature_imp_df['Feature'], feature_imp_df['Importance'], color='coral')
+plt.xlabel('Importance', fontsize=12)
+plt.title('Top 10 Feature Importances', fontsize=14)
+plt.tight_layout()
+plt.savefig('plots/feature_importance.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/feature_importance.png")
 
-sns.scatterplot(
-    data=laps,
-    x="SpeedST",
-    y="LapTime",
-    hue="Compound",
-    alpha=0.7
-)
+# ============ PART 7: ANOMALY DETECTION ============
+print("\n🚨 STEP 6: Anomaly Detection...")
 
-plt.title("Speed Trap Speed vs Lap Time")
-plt.xlabel("SpeedST (km/h)")
-plt.ylabel("Lap Time (Seconds)")
+laps['IsAnomaly'] = False
 
-plt.savefig(
-    "plots/speed_correlation.png",
-    dpi=300,
-    bbox_inches="tight"
-)
+for driver in laps['Driver'].unique():
+    driver_laps = laps[laps['Driver'] == driver]
+    median_time = driver_laps['LapTime_sec'].median()
+    std_time = driver_laps['LapTime_sec'].std()
+    
+    # Flag laps > 2 standard deviations from median
+    anomaly_mask = (laps['Driver'] == driver) & \
+                   (abs(laps['LapTime_sec'] - median_time) > 2 * std_time)
+    laps.loc[anomaly_mask, 'IsAnomaly'] = True
 
-plt.show()
+# Print anomaly summary
+print("\n📋 Anomaly Detection Summary:")
+print(f"Total anomalies found: {laps['IsAnomaly'].sum()}")
 
-print("Speed correlation graph saved successfully!")
+print("\nPer-driver anomaly count:")
+driver_anomalies = laps[laps['IsAnomaly']].groupby('Driver').size()
+for driver in laps['Driver'].unique():
+    count = driver_anomalies.get(driver, 0)
+    print(f"   {driver}: {count} anomaly laps")
 
-# ==========================================
-# ANOMALY DETECTION
-# ==========================================
+# Plot anomalies for top 3 drivers
+top_drivers = laps.groupby('Driver')['LapTime_sec'].mean().nsmallest(3).index.tolist()
 
-print("\n" + "=" * 50)
-print("ANOMALY DETECTION")
-print("=" * 50)
+fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+for idx, driver in enumerate(top_drivers):
+    driver_data = laps[laps['Driver'] == driver]
+    normal = driver_data[~driver_data['IsAnomaly']]
+    anomalies = driver_data[driver_data['IsAnomaly']]
+    
+    axes[idx].scatter(normal['LapNumber'], normal['LapTime_sec'], 
+                      alpha=0.6, color='blue', label='Normal')
+    axes[idx].scatter(anomalies['LapNumber'], anomalies['LapTime_sec'], 
+                      color='red', marker='*', s=200, label='Anomaly')
+    axes[idx].axhline(driver_data['LapTime_sec'].median(), 
+                      color='green', linestyle='--', label='Median')
+    axes[idx].set_title(f'{driver} - Lap Times', fontsize=12)
+    axes[idx].set_xlabel('Lap Number')
+    axes[idx].set_ylabel('Lap Time (seconds)')
+    axes[idx].legend()
 
-plt.figure(figsize=(10, 6))
+plt.suptitle('Anomaly Detection - Laps > 2σ from Driver Median', fontsize=14)
+plt.tight_layout()
+plt.savefig('plots/anomaly_detection.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: plots/anomaly_detection.png")
 
-sns.boxplot(
-    x=laps["LapTime"]
-)
-
-plt.title("Anomaly Detection using Lap Time Distribution")
-
-plt.savefig(
-    "plots/anomaly_detection.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-
-print("Anomaly detection graph saved successfully!")
-
-# ==========================================
-# TASK 7 - FEATURE ENGINEERING
-# ==========================================
-
-print("\n" + "=" * 50)
-print("FEATURE ENGINEERING")
-print("=" * 50)
-
-model_data = laps.copy()
-
-le_driver = LabelEncoder()
-le_team = LabelEncoder()
-le_compound = LabelEncoder()
-
-model_data["Driver"] = le_driver.fit_transform(model_data["Driver"])
-model_data["Team"] = le_team.fit_transform(model_data["Team"])
-model_data["Compound"] = le_compound.fit_transform(model_data["Compound"])
-
-features = [
-    "Driver",
-    "Team",
-    "LapNumber",
-    "Compound",
-    "TyreLife",
-    "SpeedI1",
-    "SpeedI2",
-    "SpeedFL",
-    "SpeedST"
-]
-
-X = model_data[features]
-y = model_data["LapTime"]
-
-print("Feature matrix shape:", X.shape)
-print("Target vector shape :", y.shape)
-
-# ==========================================
-# TASK 8 - RANDOM FOREST MODEL
-# ==========================================
-
-print("\n" + "=" * 50)
-print("RANDOM FOREST MODEL")
-print("=" * 50)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42
-)
-
-model = RandomForestRegressor(
-    n_estimators=100,
-    random_state=42
-)
-
-model.fit(X_train, y_train)
-
-predictions = model.predict(X_test)
-
-mae = mean_absolute_error(y_test, predictions)
-r2 = r2_score(y_test, predictions)
-
-print(f"Mean Absolute Error : {mae:.3f}")
-print(f"R² Score            : {r2:.3f}")
-
-print("\nModel Interpretation:")
-print(
-    f"The Random Forest Regressor achieved a Mean Absolute Error (MAE) "
-    f"of {mae:.3f} seconds and an R² Score of {r2:.3f}. "
-    f"This indicates that the model predicts lap times with very high accuracy "
-    f"and explains approximately {r2*100:.1f}% of the variation in lap time performance."
-)
-
-# ==========================================
-# FEATURE IMPORTANCE
-# ==========================================
-
-importance_df = pd.DataFrame({
-    "Feature": features,
-    "Importance": model.feature_importances_
-})
-
-importance_df = importance_df.sort_values(
-    by="Importance",
-    ascending=False
-)
-
-print("\nFeature Importance:")
-print(importance_df)
-
-print("\nFeature Importance Analysis:")
-print(
-    "SpeedST is the most influential factor affecting lap time, "
-    "contributing approximately 72.95% of the model's decision-making power. "
-    "TyreLife is the second most important feature, indicating that tyre degradation "
-    "has a significant impact on race performance."
-)
-
-plt.figure(figsize=(10, 6))
-
-sns.barplot(
-    data=importance_df,
-    x="Importance",
-    y="Feature"
-)
-
-plt.title("Feature Importance - Random Forest")
-
-plt.savefig(
-    "plots/feature_importance.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-
-# ==========================================
-# PREDICTED VS ACTUAL
-# ==========================================
-
-print("\n" + "=" * 50)
-print("PREDICTED VS ACTUAL")
-print("=" * 50)
-
-plt.figure(figsize=(8, 6))
-
-plt.scatter(
-    y_test,
-    predictions,
-    alpha=0.6
-)
-
-plt.xlabel("Actual Lap Time")
-plt.ylabel("Predicted Lap Time")
-plt.title("Actual vs Predicted Lap Times")
-
-plt.savefig(
-    "plots/predicted_vs_actual.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-
-print("Predicted vs Actual graph saved successfully!")
-
-print("Feature importance graph saved successfully!")
-
-print("\nPROJECT COMPLETED SUCCESSFULLY!")
-print("All graphs saved inside the 'plots' folder.")
+# ============ PART 8: FINAL SUMMARY ============
+print("\n" + "=" * 60)
+print("✅ PROJECT COMPLETED SUCCESSFULLY!")
+print("=" * 60)
+print("\n📁 Output files saved in 'plots/' folder:")
+print("   - lap_distribution.png")
+print("   - compound_boxplot.png")
+print("   - sector_comparison.png")
+print("   - speed_correlation.png")
+print("   - predicted_vs_actual.png")
+print("   - feature_importance.png")
+print("   - anomaly_detection.png")
+print("\n🎯 Ready to push to GitHub!")
