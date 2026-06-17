@@ -1,38 +1,61 @@
-# 🏎️ F1 Race Performance Analysis
+# F1 AI/ML Analytics – Live Telemetry Dashboard
 
-## AI/ML Pipeline for Lap Time Prediction & Anomaly Detection
+**Live Race Simulation · ML Predictions · Anomaly Detection**
 
-### 📋 Project Overview
+---
 
-Complete data science pipeline for analyzing Formula 1 race data using the 2024 Bahrain Grand Prix. Built for DataCore Analytics AI/ML Engineering internship.
+## Overview
 
-### 🎯 Key Features
+Interactive F1 dashboard for the **2024 Bahrain Grand Prix** featuring:
 
-- ✅ **Data Collection**: FastF1 API integration
-- ✅ **Data Cleaning**: Null removal, outlier filtering
-- ✅ **Exploratory Analysis**: 4 visualization plots
-- ✅ **Feature Engineering**: 10+ engineered features
-- ✅ **ML Modeling**: Random Forest (R² > 0.85)
-- ✅ **Anomaly Detection**: Statistical outlier identification
-- ✅ **Web Dashboard**: Interactive visualization
+- 🏎️ **Live Race Simulation** – 10 cars on a realistic circuit
+- 📡 **Telemetry Charts** – Lap times, tyre degradation, sector analysis
+- 🤖 **ML Model** – Random Forest with **R² = 0.9835**
+- ⚠️ **Anomaly Detection** – Statistical outlier identification
 
-### 🛠️ Tech Stack
+---
+
+## Key Results
+
+| Metric | Value |
+|--------|-------|
+| R² Score | **0.9835** |
+| MAE | 0.386s |
+| RMSE | 0.532s |
+| Laps Cleaned | 1,101 |
+| Features | 13 |
+| Anomalies | 40 |
+
+**Top Features:** SectorBalance (67.5%), SpeedST (13.4%), TyreLife (9.7%)
+
+**Fastest Driver:** VER – 96.56s avg lap time
+
+---
+
+## Tech Stack
 
 | Tool | Purpose |
 |------|---------|
-| Python 3.8+ | Core language |
 | FastF1 | F1 data access |
-| Pandas/NumPy | Data processing |
-| Scikit-learn | Machine learning |
-| Matplotlib/Seaborn | Visualization |
-| HTML/CSS/JS | Web dashboard |
+| Python / Pandas / NumPy | Data processing |
+| Scikit-learn | Machine Learning |
+| Matplotlib / Seaborn | Visualizations |
+| Plotly.js / Chart.js | Interactive charts |
+| HTML / CSS / JS | Dashboard |
 
-### 📦 Installation
+---
+
+## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/nivedell09-bit/f1-aiml-analysis.git
-cd f1-aiml-analysis
+# Clone
+git clone https://github.com/nivedell09-bit/f1-race-analysis.git
+cd f1-race-analysis
 
-# Install dependencies
+# Install
 pip install fastf1 pandas numpy scikit-learn matplotlib seaborn
+
+# Run analysis
+python f1_analysis.py
+
+## github repository: 
