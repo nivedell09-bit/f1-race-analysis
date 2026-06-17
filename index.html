@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>F1 AI/ML Analytics — Bahrain GP 2024</title>
+    <title>F1 AI/ML Analytics — Live Telemetry</title>
+    <!-- Plotly CDN for Dynamic Graph Engines -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- ══════════════ HEADER ══════════════ -->
     <header class="site-header">
         <div class="header-inner">
             <div class="brand">
                 <div class="brand-bar"></div>
                 <div>
                     <div class="brand-title">F1 AI/ML ANALYTICS</div>
-                    <div class="brand-sub">BAHRAIN GRAND PRIX 2024 · LIVE TELEMETRY</div>
+                    <div class="brand-sub">LIVE TELEMETRY STREAMING</div>
                 </div>
             </div>
             <div class="hstats">
                 <div class="hstat"><span class="hstat-v" id="hLaps">57</span><span class="hstat-l">TOTAL LAPS</span></div>
-                <div class="hstat"><span class="hstat-v" id="hDrivers">20</span><span class="hstat-l">DRIVERS</span></div>
+                <div class="hstat"><span class="hstat-v" id="hDrivers">10</span><span class="hstat-l">CANDIDATES</span></div>
                 <div class="hstat"><span class="hstat-v" id="hFastest">87.3s</span><span class="hstat-l">FASTEST LAP</span></div>
                 <div class="hstat"><span class="hstat-v red">RF R²=0.98</span><span class="hstat-l">ML MODEL</span></div>
             </div>
         </div>
     </header>
 
+    <!-- ══════════════ TAB NAV ══════════════ -->
     <nav class="tab-nav">
         <button class="tab-btn active" data-tab="race">🏎 RACE ANIMATION</button>
         <button class="tab-btn" data-tab="telemetry">📡 TELEMETRY</button>
@@ -34,6 +37,7 @@
         <button class="tab-btn" data-tab="anomaly">⚠️ ANOMALIES</button>
     </nav>
 
+    <!-- ══════════════ TAB: RACE ══════════════ -->
     <section class="tab-panel active" id="tab-race">
         <div class="race-ctrl glass">
             <button class="btn-p" id="btnStart">▶ START RACE</button>
@@ -48,7 +52,7 @@
         </div>
         <div class="race-grid">
             <div class="glass track-wrap">
-                <div class="lbl">BAHRAIN INTERNATIONAL CIRCUIT — 5.412 KM</div>
+                <div class="lbl">CIRCUIT PATH — LIVE SIMULATION</div>
                 <canvas id="trackCanvas" width="680" height="360"></canvas>
                 <div class="pit-overlay" id="pitOverlay">🔧 PIT STOP</div>
             </div>
@@ -59,10 +63,11 @@
         </div>
     </section>
 
+    <!-- ══════════════ TAB: TELEMETRY ══════════════ -->
     <section class="tab-panel" id="tab-telemetry">
         <div class="charts-grid">
             <div class="glass chart-card fw">
-                <div class="lbl">LAP TIME PROGRESSION — ALL DRIVERS</div>
+                <div class="lbl">LAP TIME PROGRESSION — LIVE UPDATING</div>
                 <div class="chart-box" id="chartLap"></div>
             </div>
             <div class="glass chart-card">
@@ -76,6 +81,7 @@
         </div>
     </section>
 
+    <!-- ══════════════ TAB: ML ══════════════ -->
     <section class="tab-panel" id="tab-ml">
         <div class="ml-grid">
             <div class="glass" style="padding:18px">
@@ -85,13 +91,12 @@
                     <div class="metric-card"><div class="metric-val y">0.33</div><div class="metric-lbl">MAE (s)</div></div>
                     <div class="metric-card"><div class="metric-val r">0.49</div><div class="metric-lbl">RMSE (s)</div></div>
                 </div>
-                <div class="model-badge">✅ Model accuracy: <strong>98%</strong> — Excellent predictive power on Bahrain GP data</div>
+                <div class="model-badge">✅ Model accuracy: <strong>98%</strong> — Excellent predictive power</div>
                 <div style="margin-top:14px">
-                    <div class="lbl">AI RACE PREDICTIONS</div>
+                    <div class="lbl">AI PREDICTIONS</div>
                     <div class="pred-list">
-                        <div class="pred-item"><span class="pred-key">🏆 PREDICTED WINNER</span><span class="pred-val">VER</span></div>
+                        <div class="pred-item"><span class="pred-key">🏆 PREDICTED WINNER</span><span class="pred-val" id="mlWinner">VER</span></div>
                         <div class="pred-item"><span class="pred-key">⚡ FASTEST LAP DRIVER</span><span class="pred-val">VER</span></div>
-                        <div class="pred-item"><span class="pred-key">🕐 FASTEST LAP TIME</span><span class="pred-val">87.294s</span></div>
                         <div class="pred-item"><span class="pred-key">📊 MODEL CONFIDENCE</span><span class="pred-val">98.2%</span></div>
                     </div>
                 </div>
@@ -107,6 +112,7 @@
         </div>
     </section>
 
+    <!-- ══════════════ TAB: ANOMALIES ══════════════ -->
     <section class="tab-panel" id="tab-anomaly">
         <div class="charts-grid">
             <div class="glass chart-card fw">
@@ -123,21 +129,9 @@
         </div>
     </section>
 
-    <div class="static-plots glass">
-        <div class="lbl">ANALYSIS PLOTS — FROM YOUR PYTHON PIPELINE</div>
-        <div class="plots-grid">
-            <div class="plot-item"><img src="plots/lap_distribution.png" alt="Lap Distribution" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Lap Distribution</div></div>
-            <div class="plot-item"><img src="plots/compound_boxplot.png" alt="Compound Boxplot" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Tyre Compound</div></div>
-            <div class="plot-item"><img src="plots/sector_comparison.png" alt="Sector Comparison" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Sector Comparison</div></div>
-            <div class="plot-item"><img src="plots/speed_correlation.png" alt="Speed Correlation" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Speed Correlation</div></div>
-            <div class="plot-item"><img src="plots/predicted_vs_actual.png" alt="Predicted vs Actual" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Predicted vs Actual</div></div>
-            <div class="plot-item"><img src="plots/feature_importance.png" alt="Feature Importance" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Feature Importance</div></div>
-            <div class="plot-item"><img src="plots/anomaly_detection.png" alt="Anomaly Detection" onerror="this.parentElement.style.display='none'"/><div class="plot-caption">Anomaly Detection</div></div>
-        </div>
-    </div>
+    <footer class="site-footer">F1 AI/ML Analytics · Live Telemetry Loop Engine · Random Forest R²=0.98</footer>
 
-    <footer class="site-footer">F1 AI/ML Analytics · Bahrain GP 2024 · FastF1 Data · Random Forest R²=0.98 · MAE=0.33s</footer>
-
+    <!-- Execution Engine Script Link -->
     <script src="app.js"></script>
 </body>
 </html>
