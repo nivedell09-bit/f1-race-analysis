@@ -3,7 +3,7 @@
 **Live Race Simulation · ML Predictions · Anomaly Detection**
 
 **live sever link:**
-https://nivedel109-bit.github.io/f1-race-analysis/
+https://nivedell09-bit.github.io/f1-race-analysis/
 
 ---
 
