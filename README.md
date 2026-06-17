@@ -57,5 +57,3 @@ pip install fastf1 pandas numpy scikit-learn matplotlib seaborn
 
 # Run analysis
 python f1_analysis.py
-
-## github repository: 
