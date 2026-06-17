@@ -1,0 +1,130 @@
+/* ═══════════════════ RESET & VARIABLES ═══════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E8002D;--red-dim:rgba(232,0,45,0.15);
+  --gold:#FFD700;--green:#00D4AA;--blue:#3671C6;
+  --bg:#05050a;--bg2:#0d0d1a;--bg3:#12121f;
+  --glass:rgba(255,255,255,0.04);--glass-bd:rgba(255,255,255,0.09);
+  --text:#f0f0f5;--muted:#6b6b80;--mono:'Courier New',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
+
+/* ═══════════════════ GLASSMORPHISM PANELS ═══════════════════ */
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-bd);border-radius:14px;
+}
+
+/* ═══════════════════ HEADER STRUCTURE ═══════════════════ */
+.site-header{
+  background:linear-gradient(90deg,#08080f 55%,rgba(232,0,45,0.07));
+  border-bottom:1px solid rgba(232,0,45,0.35);
+  padding:14px 28px;position:sticky;top:0;z-index:200;
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-bar{width:5px;height:42px;background:var(--red);border-radius:3px;flex-shrink:0}
+.brand-title{font-size:21px;font-weight:bold;letter-spacing:.1em}
+.brand-sub{font-size:9px;color:var(--red);letter-spacing:.22em;margin-top:3px}
+.hstats{display:flex;gap:28px}
+.hstat{display:flex;flex-direction:column;align-items:center}
+.hstat-v{font-size:17px;font-weight:bold}
+.hstat-v.red{color:var(--red)}
+.hstat-l{font-size:8px;color:var(--muted);letter-spacing:.15em;margin-top:2px}
+
+/* ═══════════════════ NAV NAVIGATION TABS ═══════════════════ */
+.tab-nav{
+  display:flex;border-bottom:1px solid var(--glass-bd);
+  padding:0 28px;background:var(--bg2);overflow-x:auto;
+}
+.tab-btn{
+  background:none;border:none;border-bottom:3px solid transparent;
+  color:var(--muted);font-family:var(--mono);font-size:11px;
+  letter-spacing:.12em;padding:14px 22px;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.tab-btn:hover{color:#fff}
+.tab-btn.active{color:var(--red);border-bottom-color:var(--red)}
+.tab-panel{display:none;padding:22px 28px}
+.tab-panel.active{display:block}
+
+/* ═══════════════════ SECTION LABELS ═══════════════════ */
+.lbl{font-size:9px;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:10px}
+
+/* ═══════════════════ RACE CONTROL INTERFACE ═══════════════════ */
+.race-ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;margin-bottom:16px}
+.btn-p{background:var(--red);border:none;color:#fff;padding:9px 22px;border-radius:7px;font-family:var(--mono);font-size:11px;font-weight:bold;letter-spacing:.1em;cursor:pointer;transition:opacity .2s}
+.btn-p:hover{opacity:.85}
+.btn-s{background:var(--glass);border:1px solid var(--glass-bd);color:var(--muted);padding:9px 16px;border-radius:7px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .2s}
+.btn-s:hover{color:#fff;border-color:#555}
+.spd-ctrl{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted)}
+.spd-ctrl input{accent-color:var(--red);width:80px}
+.lap-disp{margin-left:auto;font-size:16px;font-weight:bold;color:var(--red);letter-spacing:.1em}
+
+/* ═══════════════════ RACE LAYOUT GRID ═══════════════════ */
+.race-grid{display:grid;grid-template-columns:1fr 300px;gap:14px}
+.track-wrap{padding:14px;position:relative;overflow:hidden}
+#trackCanvas{width:100%;height:auto;display:block;border-radius:8px}
+.pit-overlay{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  background:rgba(232,0,45,.92);padding:6px 24px;border-radius:20px;
+  font-size:12px;font-weight:bold;letter-spacing:.15em;
+  animation:pitP .5s infinite alternate;display:none;
+}
+@keyframes pitP{from{opacity:.7}to{opacity:1}}
+
+/* ═══════════════════ LIVE LEADERBOARD ROWS ═══════════════════ */
+.lb-wrap{padding:14px}
+.lb-list{display:flex;flex-direction:column;gap:5px}
+.lb-row{
+  display:grid;grid-template-columns:26px 10px 1fr auto auto;
+  align-items:center;gap:8px;padding:7px 10px;
+  border-radius:7px;background:rgba(255,255,255,0.03);
+  border-left:3px solid transparent;transition:all .4s;font-size:11px;
+}
+.lb-row.p1{background:var(--red-dim);border-left-color:var(--red)}
+.lb-row.p2{border-left-color:#888}
+.lb-row.p3{border-left-color:#cd7f32}
+.lb-pos{font-weight:bold;color:var(--muted);font-size:10px}
+.lb-pos.lead{color:var(--red)}
+.lb-dot{width:8px;height:8px;border-radius:50%}
+.lb-name{font-weight:bold;letter-spacing:.06em}
+.lb-tire{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:bold}
+.lb-gap{font-size:9px;color:var(--muted);text-align:right}
+
+/* ═══════════════════ PLOTLY WIDGET CONTAINERS ═══════════════════ */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{padding:14px}
+.chart-card.fw{grid-column:1/-1}
+.chart-box{height:260px}
+
+/* ═══════════════════ ML METRICS GRID ═══════════════════ */
+.ml-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.metric-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.metric-card{background:rgba(255,255,255,0.04);border:1px solid var(--glass-bd);border-radius:10px;padding:14px;text-align:center}
+.metric-val{font-size:26px;font-weight:bold}
+.metric-val.g{color:var(--green)}.metric-val.y{color:var(--gold)}.metric-val.r{color:var(--red)}
+.metric-lbl{font-size:9px;color:var(--muted);letter-spacing:.12em;margin-top:4px}
+.model-badge{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.25);border-radius:7px;padding:8px 12px;font-size:10px;color:var(--green)}
+.pred-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.pred-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--glass-bd)}
+.pred-key{font-size:9px;color:var(--muted);letter-spacing:.12em}
+.pred-val{font-size:13px;font-weight:bold;color:var(--red)}
+
+/* ═══════════════════ ANOMALY MONITOR TABLE ═══════════════════ */
+.a-table-wrap{padding:14px;overflow-x:auto}
+.a-table{width:100%;border-collapse:collapse;font-size:11px}
+.a-table th{text-align:left;padding:8px 12px;color:var(--red);font-size:9px;letter-spacing:.12em;border-bottom:1px solid rgba(232,0,45,.3)}
+.a-table td{padding:7px 12px;border-bottom:1px solid var(--glass-bd)}
+.a-table tr:hover td{background:rgba(255,255,255,.03)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:bold;letter-spacing:.08em}
+.bh{background:rgba(232,0,45,.2);color:var(--red);border:1px solid var(--red)}
+.bm{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid var(--gold)}
+.bl{background:rgba(0,212,170,.12);color:var(--green);border:1px solid var(--green)}
+
+.site-footer{text-align:center;padding:18px;font-size:9px;color:var(--muted);letter-spacing:.12em;border-top:1px solid var(--glass-bd);margin-top:20px}
+
+@media(max-width:900px){.race-grid,.charts-grid,.ml-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.site-header{padding:10px 12px}.tab-panel{padding:14px 12px}}
